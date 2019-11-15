@@ -8,7 +8,7 @@ Each consumer consumes a product if any exists.
 Producer and consumers run concurrently
 Print each step and the number of products consumed by the consumer.
 */
-#if 0
+#if 1
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -51,31 +51,26 @@ void Taken(int which){
 
 void* firstConsumer(void* arg){
 	while(count != Produced || totalProduced != 0){
+		pthread_mutex_lock(&mutex1); // Critical Section
 		if(totalProduced!=0){
-			pthread_mutex_lock(&mutex1); // Critical Section
 			Taken(1);
-			pthread_mutex_unlock(&mutex1); // End of Critical Section
 		}
-		else{
-			printf("First Consumer is Waiting\n");
-			sleep(1);
-		}
+		pthread_mutex_unlock(&mutex1); // End of Critical Section
+		//printf("First Consumer is Waiting\n");
+		//sleep(1);
 	}
 	pthread_exit(0);
 }
 
 void* secondConsumer(void* arg){
 	while(count != Produced || totalProduced != 0){
+		pthread_mutex_lock(&mutex1); // Critical Section
 		if(totalProduced!=0){
-			pthread_mutex_lock(&mutex1); // Critical Section
 			Taken(2);
-			pthread_mutex_unlock(&mutex1); // End of Critical Section
 		}
-		else{
-			printf("Second Consumer is Waiting\n");
-			sleep(1);
-		}
-		
+		pthread_mutex_unlock(&mutex1); // End of Critical Section
+		//printf("Second Consumer is Waiting\n");
+		//sleep(1);
 	}
 	pthread_exit(0);
 }
@@ -143,32 +138,28 @@ void Taken(int which){
 
 void* firstConsumer(void* arg){
 	while(count != Produced || totalProduced != 0){
+		pthread_mutex_lock(&mutex1); // Critical Section
 		if(totalProduced!=0 && turns == 0){
-			pthread_mutex_lock(&mutex1); // Critical Section
 			Taken(1);
-			turns++;
-			pthread_mutex_unlock(&mutex1); // End of Critical Section
+			turns++;	
 		}
-		else{
-			printf("First Consumer is Waiting\n");
-			sleep(1);
-		}
+		pthread_mutex_unlock(&mutex1); // End of Critical Section
+		//printf("First Consumer is Waiting\n");
+		//sleep(1);
 	}
 	pthread_exit(0);
 }
 
 void* secondConsumer(void* arg){
 	while(count != Produced || totalProduced != 0){
+		pthread_mutex_lock(&mutex1); // Critical Section
 		if(totalProduced!=0 && turns == 1){
-			pthread_mutex_lock(&mutex1); // Critical Section
 			Taken(2);
 			turns--;
-			pthread_mutex_unlock(&mutex1); // End of Critical Section
 		}
-		else{
-			printf("Second Consumer is Waiting\n");
-			sleep(1);
-		}
+		pthread_mutex_unlock(&mutex1); // End of Critical Section
+		//printf("Second Consumer is Waiting\n");
+		//sleep(1);
 	}
 	pthread_exit(0);
 }
