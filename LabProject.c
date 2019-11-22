@@ -8,14 +8,14 @@ Each consumer consumes a product if any exists.
 Producer and consumers run concurrently
 Print each step and the number of products consumed by the consumer.
 */
-#if 1
+#if 0
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <sys/wait.h>
 
-#define Produced 50
+#define Produced 100
 
 int totalProduced = 0;
 int count = 0;
@@ -26,12 +26,12 @@ pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER; // Setting Up MUTEX
 
 void* Producers(void* arg){
 	while(count < Produced){
-		printf("Producers has produced %d out of %d\n", count + 1, Produced);
+		//printf("Producers has produced %d out of %d\n", count + 1, Produced);
 		pthread_mutex_lock(&mutex1); // Critical Section
 		totalProduced++;
 		count++;
 		pthread_mutex_unlock(&mutex1); // End of Critical Section
-		sleep(2);
+		sleep(1);
 		
 	}
 	pthread_exit(0); // Exit Thread.
@@ -39,11 +39,11 @@ void* Producers(void* arg){
 
 void Taken(int which){
 	if (which == 1){
-		printf("First Consumer Took it\n");
+		//printf("First Consumer Took it\n");
 		first++;
 	}
 	if (which == 2){
-		printf("Second Consumer Took it\n");
+		//printf("Second Consumer Took it\n");
 		second++;
 	}
 	totalProduced--;
@@ -100,37 +100,38 @@ int main(){
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <stdbool.h>
 #include <sys/wait.h>
 
-#define Produced 20
+#define Produced 100000
 
 int totalProduced = 0;
 int count = 0;
 int first = 0;
 int second = 0; 
-int turns = 0;
+char turn = 'i';
 pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER; // Setting Up MUTEX
 
 
 void* Producers(void* arg){
 	while(count < Produced){
-		printf("Producers has produced %d out of %d\n", count + 1, Produced);
+		//printf("Producers has produced %d out of %d\n", count + 1, Produced);
 		pthread_mutex_lock(&mutex1); // Critical Section
 		totalProduced++;
 		count++;
 		pthread_mutex_unlock(&mutex1); // End of Critical Section
-		sleep(2);
+		sleep(1);
 	}
 	pthread_exit(0); // Exit Thread.
 }
 
 void Taken(int which){
 	if (which == 1){
-		printf("First Consumer Took it\n");
+		//printf("First Consumer Took it\n");
 		first++;
 	}
 	if (which == 2){
-		printf("Second Consumer Took it\n");
+		//printf("Second Consumer Took it\n");
 		second++;
 	}
 	totalProduced--;
@@ -139,9 +140,11 @@ void Taken(int which){
 void* firstConsumer(void* arg){
 	while(count != Produced || totalProduced != 0){
 		pthread_mutex_lock(&mutex1); // Critical Section
-		if(totalProduced!=0 && turns == 0){
+		if(totalProduced!= 0 && turn == 'i'){
 			Taken(1);
-			turns++;	
+			turn = 'j';
+			// flagj = true;
+			// flagi = false;
 		}
 		pthread_mutex_unlock(&mutex1); // End of Critical Section
 		//printf("First Consumer is Waiting\n");
@@ -153,9 +156,9 @@ void* firstConsumer(void* arg){
 void* secondConsumer(void* arg){
 	while(count != Produced || totalProduced != 0){
 		pthread_mutex_lock(&mutex1); // Critical Section
-		if(totalProduced!=0 && turns == 1){
+		if(totalProduced!= 0 && turn == 'j'){
 			Taken(2);
-			turns--;
+			turn = 'i';
 		}
 		pthread_mutex_unlock(&mutex1); // End of Critical Section
 		//printf("Second Consumer is Waiting\n");
